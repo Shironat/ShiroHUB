@@ -37,7 +37,7 @@ local flyVelocity
 local flyGyro
 
 local flingEnabled = false
-local flingPower = 200000
+local flingConnection
 
 local attacking = false
 
@@ -223,70 +223,34 @@ local function bringLocal(target)
 end
 
 -- Touch fling
-local function onTouch(part)
-    if not flingEnabled then return end
-    if not part or not part.Parent then return end
+local function startFling()
+    if flingConnection then return end
 
-    local otherChar = part.Parent
-    local otherPlayer = Players:GetPlayerFromCharacter(otherChar)
-    if not otherPlayer or otherPlayer == player then return end
+    flingConnection = RunService.Heartbeat:Connect(function()
+        if not flingEnabled then return end
 
-    local otherHRP = otherChar:FindFirstChild("HumanoidRootPart")
-    local otherHum = otherChar:FindFirstChildOfClass("Humanoid")
-    if not otherHRP or not otherHum or otherHum.Health <= 0 then return end
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
 
-    local myHRP = getHRP()
+        local vel = hrp.Velocity
 
-    local safeCFrame = myHRP.CFrame
-
-    myHRP.AssemblyLinearVelocity = Vector3.zero
-    myHRP.AssemblyAngularVelocity = Vector3.zero
-
-    local att = Instance.new("Attachment", otherHRP)
-
-    local av = Instance.new("AngularVelocity")
-    av.Attachment0 = att
-    av.MaxTorque = math.huge
-    av.AngularVelocity = Vector3.new(
-        math.random(-40,40),
-        math.random(90,130),
-        math.random(-40,40)
-    )
-    av.Parent = otherHRP
-
-    game:GetService("Debris"):AddItem(av, 0.25)
-    game:GetService("Debris"):AddItem(att, 0.25)
-
-    task.defer(function()
-        if myHRP and myHRP.Parent then
-            myHRP.CFrame = safeCFrame
-            myHRP.AssemblyLinearVelocity = Vector3.zero
-            myHRP.AssemblyAngularVelocity = Vector3.zero
-        end
+        -- núcleo do fling do pastebin
+        hrp.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+        RunService.RenderStepped:Wait()
+        hrp.Velocity = vel
+        RunService.RenderStepped:Wait()
+        hrp.Velocity = vel + Vector3.new(0, 50, 0)
     end)
 end
 
-local flingConnections = {}
-
-local function enableFling()
-    local char = getCharacter()
-
-    for _, part in ipairs(char:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-
-            flingConnections[part] =
-                part.Touched:Connect(onTouch)
-        end
+local function stopFling()
+    if flingConnection then
+        flingConnection:Disconnect()
+        flingConnection = nil
     end
 end
 
-local function disableFling()
-    for _, conn in pairs(flingConnections) do
-        conn:Disconnect()
-    end
-    flingConnections = {}
-end
 
 -- teclas
 local keys = {
@@ -483,11 +447,10 @@ Exploits:CreateToggle({
     Callback = function(Value)
         flingEnabled = Value
         if flingEnabled then
-            enableFling()
+           startFling()
         else
-            disableFling()
+           stopFling()
         end
-    end
 })
 
 -- Bring
