@@ -233,6 +233,7 @@ local function onTouch(part)
     local otherHum = otherChar:FindFirstChildOfClass("Humanoid")
     local otherHRP = otherChar:FindFirstChild("HumanoidRootPart")
     local myHRP = getHRP()
+    myHRP.AssemblyLinearVelocity = Vector3.zero
 
     if otherHum and otherHRP and otherHum.Health > 0 then
         local dir = (otherHRP.Position - myHRP.Position).Unit
