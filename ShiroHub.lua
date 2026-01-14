@@ -14,7 +14,6 @@ local player = Players.LocalPlayer
 -- States
 local ESP_ENABLED = true
 local MAX_DISTANCE = 400
-local ESP_ENABLED = true
 local espCache = {}
 
 local loaded = false
