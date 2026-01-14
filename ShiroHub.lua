@@ -322,7 +322,7 @@ UIS.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = false end
 end)
 
--- Começar FLY
+-- Freeze
 local function startFly()
     local char = getCharacter()
     local hrp = getHRP()
@@ -371,7 +371,7 @@ local function startFly()
     end)
 end
 
--- Parar FLY
+-- Parar Freeze
 local function stopFly()
     if flyConn then
         flyConn:Disconnect()
@@ -461,7 +461,7 @@ Exploits:CreateToggle({
 
 -- Fly
 Exploits:CreateToggle({
-    Name = "Fly",
+    Name = "Self Freeze",
     Callback = function(Value)
         flyEnabled = Value
         if flyEnabled then
@@ -575,7 +575,7 @@ Exploits:CreateButton({
         platform.Anchored = true
         platform.CanCollide = true
         platform.Material = Enum.Material.SmoothPlastic
-        platform.Color = Color3.fromRGB(80, 80, 80)
+        platform.Color = Color3.fromRGB(5, 5, 5)
         platform.Parent = workspace
 
         hrp.CFrame = platform.CFrame + Vector3.new(0, 6, 0)
