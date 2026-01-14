@@ -57,6 +57,26 @@ local function getHRP()
     return getCharacter():WaitForChild("HumanoidRootPart")
 end
 
+-- Reset
+local function forceReset()
+    local char = player.Character
+    if not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.Health = 0
+        hum:ChangeState(Enum.HumanoidStateType.Dead)
+    end
+end
+
+-- Rejoin
+local TeleportService = game:GetService("TeleportService")
+
+local function rejoin()
+    local placeId = game.PlaceId
+    TeleportService:Teleport(placeId, player)
+end
+
 -- Bring
 local function bringPlayer(target)
     if not target or target == player then return end
@@ -383,6 +403,22 @@ local Exploits = Window:CreateTab("Exploits")
 local Inject = Window:CreateTab("Injection")
 local District = Window:CreateTab("District")
 
+-- Reset
+Exploits:CreateButton({
+    Name = "Reset",
+    Callback = function()
+        forceReset()
+    end
+})
+
+-- Rejoin
+Exploits:CreateButton({
+    Name = "Relogar",
+    Callback = function()
+        rejoin()
+    end
+})
+
 -- WalkSpeed
 Exploits:CreateToggle({
     Name = "WalkSpeed",
@@ -465,7 +501,7 @@ Exploits:CreateToggle({
 
 -- Touch Fling
 Exploits:CreateToggle({
-   Name = "TouchFling",
+   Name = "TouchFling - Obsoleto",
    Callback = function(Value)
       flingEnabled = Value
       if flingEnabled then
