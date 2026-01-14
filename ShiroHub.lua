@@ -37,6 +37,7 @@ local flyVelocity
 local flyGyro
 
 local flingEnabled = false
+local flingAttach
 local flingAV
 local flingConn
 
@@ -227,29 +228,37 @@ end
 local function startFling()
     local char = getCharacter()
     local hrp = getHRP()
+    local hum = getHumanoid()
 
-    if flingAV then flingAV:Destroy() end
+    -- garante controle de rede
+    pcall(function()
+        hrp:SetNetworkOwner(player)
+    end)
 
-    -- garante colisão
+    -- colisão ligada
     for _, part in ipairs(char:GetDescendants()) do
         if part:IsA("BasePart") then
             part.CanCollide = true
         end
     end
 
-    -- rotação extrema (ESSÊNCIA do fling funcional)
+    -- attachment único
+    flingAttach = Instance.new("Attachment")
+    flingAttach.Parent = hrp
+
+    -- rotação APENAS no eixo Y (igual script funcional)
     flingAV = Instance.new("AngularVelocity")
-    flingAV.Attachment0 = Instance.new("Attachment", hrp)
+    flingAV.Attachment0 = flingAttach
+    flingAV.AngularVelocity = Vector3.new(0, 1e6, 0)
     flingAV.MaxTorque = math.huge
-    flingAV.AngularVelocity = Vector3.new(9e5, 9e5, 9e5)
     flingAV.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
     flingAV.Parent = hrp
 
-    -- mantém humanoide estável
-    local hum = getHumanoid()
+    -- humanoide estável
     hum.PlatformStand = false
+    hum.AutoRotate = true
 
-    -- segurança extra contra auto-voo
+    -- trava total de movimento linear
     flingConn = RunService.Stepped:Connect(function()
         hrp.AssemblyLinearVelocity = Vector3.zero
     end)
@@ -261,10 +270,8 @@ local function stopFling()
         flingConn = nil
     end
 
-    if flingAV then
-        flingAV:Destroy()
-        flingAV = nil
-    end
+    if flingAV then flingAV:Destroy() flingAV = nil end
+    if flingAttach then flingAttach:Destroy() flingAttach = nil end
 end
 
 -- teclas
