@@ -244,7 +244,12 @@ local function applyFling()
         + Vector3.new(0, FLING_FORCE / 2, 0)
 end
 
--- FLY
+-- teclas
+local keys = {
+    W = false, A = false, S = false, D = false,
+    Space = false, Ctrl = false
+
+-- Começar FLY
 local function startFly()
     local char = getCharacter()
     local hrp = getHRP()
@@ -292,6 +297,7 @@ local function startFly()
         flyGyro.CFrame = cam.CFrame
     end)
 end
+
 -- Parar FLY
 local function stopFly()
     if flyConn then
