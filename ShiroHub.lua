@@ -230,17 +230,17 @@ local function applyFling()
     local hrp = getHRP()
     local hum = getHumanoid()
 
-    -- garante colisão
+    if not hrp then return end
+
+    -- garante colisão das partes
     for _, part in ipairs(char:GetDescendants()) do
         if part:IsA("BasePart") then
             part.CanCollide = true
         end
     end
 
-    -- força física local
-    hrp.AssemblyLinearVelocity =
-        hrp.CFrame.LookVector * f flingPower
-        + Vector3.new(0, FLING_FORCE / 2, 0)
+    -- aplica força no personagem
+    hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * flingPower + Vector3.new(0, flingPower / 2, 0)
 end
 
 -- teclas
