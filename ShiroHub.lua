@@ -30,9 +30,12 @@ local originalSpeed
 local jumpEnabled = false
 local originalJump
 
-local flying = false
+local flyEnabled = false
+local flySpeed = 50
 local flyConn
-local flyspeed = 50
+local flyAttach
+local flyVelocity
+local flyGyro
 
 local flingEnabled = false
 local flingPower = 200000
@@ -221,42 +224,89 @@ local function bringLocal(target)
 end
 
 -- Touch fling
-local function onTouch(part)
+local function applyFling()
     if not flingEnabled then return end
-    if not part or not part.Parent then return end
 
-    local hum = part.Parent:FindFirstChildOfClass("Humanoid")
-    local hrp = part.Parent:FindFirstChild("HumanoidRootPart")
+    local char = getCharacter()
+    local hrp = getHRP()
+    local hum = getHumanoid()
 
-    if hum and hrp and part.Parent ~= getCharacter() then
-        local myHRP = getHRP()
-        local dir = (hrp.Position - myHRP.Position).Unit
-        hrp.AssemblyLinearVelocity = dir * flingPower + Vector3.new(0, flingPower / 3, 0)
+    -- garante colisão
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
     end
+
+    -- força física local
+    hrp.AssemblyLinearVelocity =
+        hrp.CFrame.LookVector * FLING_FORCE
+        + Vector3.new(0, FLING_FORCE / 2, 0)
 end
 
--- ================= INPUT (FLY) =================
+-- FLY
+local function startFly()
+    local char = getCharacter()
+    local hrp = getHRP()
+    local hum = getHumanoid()
 
-local keys = {W=false,A=false,S=false,D=false,Space=false,Ctrl=false}
+    hum:ChangeState(Enum.HumanoidStateType.Physics)
+    hum.AutoRotate = false
 
-UIS.InputBegan:Connect(function(i,g)
-    if g then return end
-    if i.KeyCode == Enum.KeyCode.W then keys.W = true end
-    if i.KeyCode == Enum.KeyCode.A then keys.A = true end
-    if i.KeyCode == Enum.KeyCode.S then keys.S = true end
-    if i.KeyCode == Enum.KeyCode.D then keys.D = true end
-    if i.KeyCode == Enum.KeyCode.Space then keys.Space = true end
-    if i.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = true end
-end)
+    -- Attachment
+    flyAttach = Instance.new("Attachment")
+    flyAttach.Parent = hrp
 
-UIS.InputEnded:Connect(function(i)
-    if i.KeyCode == Enum.KeyCode.W then keys.W = false end
-    if i.KeyCode == Enum.KeyCode.A then keys.A = false end
-    if i.KeyCode == Enum.KeyCode.S then keys.S = false end
-    if i.KeyCode == Enum.KeyCode.D then keys.D = false end
-    if i.KeyCode == Enum.KeyCode.Space then keys.Space = false end
-    if i.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = false end
-end)
+    -- Movimento
+    flyVelocity = Instance.new("LinearVelocity")
+    flyVelocity.Attachment0 = flyAttach
+    flyVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+    flyVelocity.MaxForce = math.huge
+    flyVelocity.VectorVelocity = Vector3.zero
+    flyVelocity.Parent = hrp
+
+    -- Rotação
+    flyGyro = Instance.new("AlignOrientation")
+    flyGyro.Attachment0 = flyAttach
+    flyGyro.MaxTorque = math.huge
+    flyGyro.Responsiveness = 200
+    flyGyro.Parent = hrp
+
+    flyConn = RunService.RenderStepped:Connect(function()
+        local cam = workspace.CurrentCamera
+        local move = Vector3.zero
+
+        if keys.W then move += cam.CFrame.LookVector end
+        if keys.S then move -= cam.CFrame.LookVector end
+        if keys.D then move += cam.CFrame.RightVector end
+        if keys.A then move -= cam.CFrame.RightVector end
+        if keys.Space then move += cam.CFrame.UpVector end
+        if keys.Ctrl then move -= cam.CFrame.UpVector end
+
+        if move.Magnitude > 0 then
+            flyVelocity.VectorVelocity = move.Unit * flySpeed
+        else
+            flyVelocity.VectorVelocity = Vector3.zero
+        end
+
+        flyGyro.CFrame = cam.CFrame
+    end)
+end
+-- Parar FLY
+local function stopFly()
+    if flyConn then
+        flyConn:Disconnect()
+        flyConn = nil
+    end
+
+    if flyAttach then flyAttach:Destroy() flyAttach = nil end
+    if flyVelocity then flyVelocity:Destroy() flyVelocity = nil end
+    if flyGyro then flyGyro:Destroy() flyGyro = nil end
+
+    local hum = getHumanoid()
+    hum.AutoRotate = true
+    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+end
 
 -- ================= UI =================
 
@@ -318,58 +368,11 @@ Exploits:CreateToggle({
 Exploits:CreateToggle({
     Name = "Fly",
     Callback = function(Value)
-        flying = Value
-        local hrp = getHRP()
-        local hum = getHumanoid()
-
-        if flying then
-            hum:ChangeState(Enum.HumanoidStateType.Physics)
-            hum.AutoRotate = false
-
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-            bv.Velocity = Vector3.zero
-            bv.Parent = hrp
-
-            local bg = Instance.new("BodyGyro")
-            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-            bg.P = 9e4
-            bg.CFrame = workspace.CurrentCamera.CFrame
-            bg.Parent = hrp
-
-            flyConn = RunService.RenderStepped:Connect(function()
-                local cam = workspace.CurrentCamera
-                local move = Vector3.zero
-
-                if keys.W then move += cam.CFrame.LookVector end
-                if keys.S then move -= cam.CFrame.LookVector end
-                if keys.D then move += cam.CFrame.RightVector end
-                if keys.A then move -= cam.CFrame.RightVector end
-                if keys.Space then move += cam.CFrame.UpVector end
-                if keys.Ctrl then move -= cam.CFrame.UpVector end
-
-                if move.Magnitude > 0 then
-                    bv.Velocity = move.Unit * flyspeed
-                else
-                    bv.Velocity = Vector3.zero
-                end
-
-                bg.CFrame = cam.CFrame
-            end)
+        flyEnabled = Value
+        if flyEnabled then
+            startFly()
         else
-            if flyConn then
-                flyConn:Disconnect()
-                flyConn = nil
-            end
-
-            for _, v in ipairs(hrp:GetChildren()) do
-                if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then
-                    v:Destroy()
-                end
-            end
-
-            hum.AutoRotate = true
-            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            stopFly()
         end
     end
 })
@@ -407,15 +410,20 @@ Exploits:CreateToggle({
 Exploits:CreateToggle({
     Name = "TouchFling",
     Callback = function(Value)
-        flingEnabled = Value
+     flingEnabled = Value
+
         if flingEnabled then
-            for _, p in ipairs(getCharacter():GetDescendants()) do
-                if p:IsA("BasePart") then
-                    p.Touched:Connect(onTouch)
+            task.spawn(function()
+                while flingEnabled do
+                    applyFling()
+                    task.wait(0.15)
                 end
-            end
+            end)
+        else
+            getHRP().AssemblyLinearVelocity = Vector3.zero
         end
     end
+})
 })
 
 -- Bring
