@@ -228,19 +228,42 @@ local function onTouch(part)
     if not part or not part.Parent then return end
 
     local otherChar = part.Parent
-    if otherChar == getCharacter() then return end
+    local otherPlayer = Players:GetPlayerFromCharacter(otherChar)
+    if not otherPlayer or otherPlayer == player then return end
 
-    local otherHum = otherChar:FindFirstChildOfClass("Humanoid")
     local otherHRP = otherChar:FindFirstChild("HumanoidRootPart")
+    local otherHum = otherChar:FindFirstChildOfClass("Humanoid")
+    if not otherHRP or not otherHum or otherHum.Health <= 0 then return end
+
     local myHRP = getHRP()
+
+    local safeCFrame = myHRP.CFrame
+
     myHRP.AssemblyLinearVelocity = Vector3.zero
+    myHRP.AssemblyAngularVelocity = Vector3.zero
 
-    if otherHum and otherHRP and otherHum.Health > 0 then
-        local dir = (otherHRP.Position - myHRP.Position).Unit
+    local att = Instance.new("Attachment", otherHRP)
 
-        otherHRP.AssemblyLinearVelocity =
-            dir * flingPower + Vector3.new(0, flingPower / 2, 0)
-    end
+    local av = Instance.new("AngularVelocity")
+    av.Attachment0 = att
+    av.MaxTorque = math.huge
+    av.AngularVelocity = Vector3.new(
+        math.random(-40,40),
+        math.random(90,130),
+        math.random(-40,40)
+    )
+    av.Parent = otherHRP
+
+    game:GetService("Debris"):AddItem(av, 0.25)
+    game:GetService("Debris"):AddItem(att, 0.25)
+
+    task.defer(function()
+        if myHRP and myHRP.Parent then
+            myHRP.CFrame = safeCFrame
+            myHRP.AssemblyLinearVelocity = Vector3.zero
+            myHRP.AssemblyAngularVelocity = Vector3.zero
+        end
+    end)
 end
 
 local flingConnections = {}
