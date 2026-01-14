@@ -37,7 +37,8 @@ local flyVelocity
 local flyGyro
 
 local flingEnabled = false
-local flingConnection
+local flingAV
+local flingConn
 
 local attacking = false
 
@@ -224,33 +225,47 @@ end
 
 -- Touch fling
 local function startFling()
-    if flingConnection then return end
+    local char = getCharacter()
+    local hrp = getHRP()
 
-    flingConnection = RunService.Heartbeat:Connect(function()
-        if not flingEnabled then return end
+    if flingAV then flingAV:Destroy() end
 
-        local char = player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
+    -- garante colisão
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
 
-        local vel = hrp.Velocity
+    -- rotação extrema (ESSÊNCIA do fling funcional)
+    flingAV = Instance.new("AngularVelocity")
+    flingAV.Attachment0 = Instance.new("Attachment", hrp)
+    flingAV.MaxTorque = math.huge
+    flingAV.AngularVelocity = Vector3.new(9e5, 9e5, 9e5)
+    flingAV.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+    flingAV.Parent = hrp
 
-        -- núcleo do fling do pastebin
-        hrp.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
-        RunService.RenderStepped:Wait()
-        hrp.Velocity = vel
-        RunService.RenderStepped:Wait()
-        hrp.Velocity = vel + Vector3.new(0, 50, 0)
+    -- mantém humanoide estável
+    local hum = getHumanoid()
+    hum.PlatformStand = false
+
+    -- segurança extra contra auto-voo
+    flingConn = RunService.Stepped:Connect(function()
+        hrp.AssemblyLinearVelocity = Vector3.zero
     end)
 end
 
 local function stopFling()
-    if flingConnection then
-        flingConnection:Disconnect()
-        flingConnection = nil
+    if flingConn then
+        flingConn:Disconnect()
+        flingConn = nil
+    end
+
+    if flingAV then
+        flingAV:Destroy()
+        flingAV = nil
     end
 end
-
 
 -- teclas
 local keys = {
