@@ -443,14 +443,15 @@ Exploits:CreateToggle({
 
 -- Touch Fling
 Exploits:CreateToggle({
-    Name = "TouchFling",
-    Callback = function(Value)
-        flingEnabled = Value
-        if flingEnabled then
-           startFling()
-        else
-           stopFling()
-        end
+   Name = "TouchFling",
+   Callback = function(Value)
+      flingEnabled = Value
+      if flingEnabled then
+         startFling()
+      else
+         stopFling()
+      end
+   end
 })
 
 -- Bring
