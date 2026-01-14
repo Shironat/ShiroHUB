@@ -240,7 +240,7 @@ local function applyFling()
 
     -- força física local
     hrp.AssemblyLinearVelocity =
-        hrp.CFrame.LookVector * FLING_FORCE
+        hrp.CFrame.LookVector * f flingPower
         + Vector3.new(0, FLING_FORCE / 2, 0)
 end
 
@@ -248,6 +248,27 @@ end
 local keys = {
     W = false, A = false, S = false, D = false,
     Space = false, Ctrl = false
+}
+
+-- Detectar Inputs
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.W then keys.W = true end
+    if input.KeyCode == Enum.KeyCode.A then keys.A = true end
+    if input.KeyCode == Enum.KeyCode.S then keys.S = true end
+    if input.KeyCode == Enum.KeyCode.D then keys.D = true end
+    if input.KeyCode == Enum.KeyCode.Space then keys.Space = true end
+    if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = true end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then keys.W = false end
+    if input.KeyCode == Enum.KeyCode.A then keys.A = false end
+    if input.KeyCode == Enum.KeyCode.S then keys.S = false end
+    if input.KeyCode == Enum.KeyCode.D then keys.D = false end
+    if input.KeyCode == Enum.KeyCode.Space then keys.Space = false end
+    if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = false end
+end)
 
 -- Começar FLY
 local function startFly()
@@ -430,7 +451,6 @@ Exploits:CreateToggle({
         end
     end
 })
-})
 
 -- Bring
 local BringDropdown = Exploits:CreateDropdown({
@@ -501,7 +521,7 @@ Exploits:CreateButton({
 })
 
 -- Dex Explorer
-Injection:CreateButton({
+Inject:CreateButton({
    Name = "Dex Explorer",
    Callback = function()
      if loaded then return end
@@ -511,7 +531,7 @@ Injection:CreateButton({
 })
 
 -- SimpleSpy
-Injection:CreateButton({
+Inject:CreateButton({
    Name = "SimpleSpy",
    Callback = function()
      if loaded then return end
@@ -521,7 +541,7 @@ Injection:CreateButton({
 })
 
 -- Infinite Yield
-Injection:CreateButton({
+Inject:CreateButton({
    Name = "Infinite Yield",
    Callback = function()
      if loaded then return end
