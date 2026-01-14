@@ -223,24 +223,45 @@ local function bringLocal(target)
 end
 
 -- Touch fling
-local function applyFling()
+local function onTouch(part)
     if not flingEnabled then return end
+    if not part or not part.Parent then return end
 
+    local otherChar = part.Parent
+    if otherChar == getCharacter() then return end
+
+    local otherHum = otherChar:FindFirstChildOfClass("Humanoid")
+    local otherHRP = otherChar:FindFirstChild("HumanoidRootPart")
+    local myHRP = getHRP()
+
+    if otherHum and otherHRP and otherHum.Health > 0 then
+        local dir = (otherHRP.Position - myHRP.Position).Unit
+
+        otherHRP.AssemblyLinearVelocity =
+            dir * flingPower + Vector3.new(0, flingPower / 2, 0)
+    end
+end
+
+local flingConnections = {}
+
+local function enableFling()
     local char = getCharacter()
-    local hrp = getHRP()
-    local hum = getHumanoid()
 
-    if not hrp then return end
-
-    -- garante colisão das partes
     for _, part in ipairs(char:GetDescendants()) do
         if part:IsA("BasePart") then
             part.CanCollide = true
+
+            flingConnections[part] =
+                part.Touched:Connect(onTouch)
         end
     end
+end
 
-    -- aplica força no personagem
-    hrp.AssemblyLinearVelocity = hrp.CFrame.LookVector * flingPower + Vector3.new(0, flingPower / 2, 0)
+local function disableFling()
+    for _, conn in pairs(flingConnections) do
+        conn:Disconnect()
+    end
+    flingConnections = {}
 end
 
 -- teclas
@@ -436,17 +457,11 @@ Exploits:CreateToggle({
 Exploits:CreateToggle({
     Name = "TouchFling",
     Callback = function(Value)
-     flingEnabled = Value
-
+        flingEnabled = Value
         if flingEnabled then
-            task.spawn(function()
-                while flingEnabled do
-                    applyFling()
-                    task.wait(0.15)
-                end
-            end)
+            enableFling()
         else
-            getHRP().AssemblyLinearVelocity = Vector3.zero
+            disableFling()
         end
     end
 })
