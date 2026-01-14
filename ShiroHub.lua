@@ -16,7 +16,9 @@ local ESP_ENABLED = true
 local MAX_DISTANCE = 400
 local espCache = {}
 
-local loaded = false
+local Dexloaded = false
+local Spyloaded = false 
+local Infloaded = false
 local antiIdleActive = false
 local idleConnection
 
@@ -584,7 +586,7 @@ Exploits:CreateButton({
 Inject:CreateButton({
    Name = "Dex Explorer",
    Callback = function()
-     if loaded then return end
+     if Dexloaded then return end
      loaded = true
      loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
     end
@@ -594,7 +596,7 @@ Inject:CreateButton({
 Inject:CreateButton({
    Name = "SimpleSpy",
    Callback = function()
-     if loaded then return end
+     if Spyloaded then return end
      loaded = true
      loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"))()
     end
@@ -604,7 +606,7 @@ Inject:CreateButton({
 Inject:CreateButton({
    Name = "Infinite Yield",
    Callback = function()
-     if loaded then return end
+     if Infloaded then return end
      loaded = true
      loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
