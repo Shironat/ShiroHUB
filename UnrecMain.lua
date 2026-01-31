@@ -17,8 +17,8 @@ local Tabs = {
     Inject = Window:CreateTab("Inject"),
     District = Window:CreateTab("District"),
     Muscle = Window:CreateTab("Muscle"),
-    Tsunami = Window:CreateTab("Tsunami"),
     Sharp = Window:CreateTab("Sharp"),
+    Tsunami = Window:CreateTab("Tsunami"),
     Logs = Windows:CreateTab("Logs"),
 }
 
