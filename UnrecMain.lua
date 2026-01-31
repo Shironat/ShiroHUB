@@ -12,21 +12,21 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Carregar modulos
-local Sections = {
-    Clogs = require(script.Sections.Logs)
-    Exploits = require(script.Sections.Exploits),
-    Inject = require(script.Sections.Inject),
-    District = require(script.Sections.District)
-    Muscle = require(script.Sections.Muscle)
-    Tsunami = require(script.Sections.Tsunami)
-    Sharp = require(script.Sections.Sharp)
+local Modules = {
+    Clogs = require(script.Modules.Logs)
+    Exploits = require(script.Modules.Exploits),
+    Inject = require(script.Modules.Inject),
+    District = require(script.Modules.District)
+    Muscle = require(script.Modules.Muscle)
+    Tsunami = require(script.Modules.Tsunami)
+    Sharp = require(script.Modules.Sharp)
 
 
 }
 
 -- Inicializa módulos
-for _, section in pairs(Sections) do
-    if section.Init then
-        section.Init(Window)
+for _, modules in pairs(Modules) do
+    if modules.Init then
+        modules.Init(Window)
     end
 end
