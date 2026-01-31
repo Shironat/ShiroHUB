@@ -1,5 +1,5 @@
 -- Rayfield
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local ShiroHub = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- Services
 local Players = game:GetService("Players")
@@ -389,7 +389,7 @@ end
 
 -- ================= UI =================
 
-local Window = Rayfield:CreateWindow({
+local Window = ShiroHub:CreateWindow({
     Name = "ShiroHub v1",
     LoadingTitle = "ShiroHub v1",
     LoadingSubtitle = "by Shiro",
