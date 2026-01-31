@@ -28,8 +28,8 @@ local Modules = {
     Inject = require(script.Modules.Inject),
     District = require(script.Modules.District),
     Muscle = require(script.Modules.Muscle),
-    Tsunami = require(script.Modules.Tsunami),
     Sharp = require(script.Modules.Sharp),
+    Tsunami = require(script.Modules.Tsunami),
     Logs = require(script.Modules.Logs),
 }
 
