@@ -602,6 +602,18 @@ Inject:CreateButton({
     end
 })
 
+-- Ketamine - ServerSide
+Inject:CreateButton({
+   Name = "Ketamine",
+   Callback = function()
+     if Spy1loaded then return end
+     loaded = true
+ 
+     loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Ketamine/refs/heads/main/Ketamine.lua"))()
+    end
+})
+
+
 -- Infinite Yield
 Inject:CreateButton({
    Name = "Infinite Yield",
