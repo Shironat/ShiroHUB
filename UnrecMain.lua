@@ -27,6 +27,6 @@ local Modules = {
 -- Inicializa módulos
 for _, modules in pairs(Modules) do
     if modules.Init then
-        modules.Init(Window)
+        modules.Init(Window, Tabs)
     end
 end
