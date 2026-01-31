@@ -1,24 +1,23 @@
---ESP
-local esp_on = true
-local esp_distance = 1000
-local espCache = {}
---Injection
-local Dexloaded = false
-local Spyloaded = false
-local Ketloaded = false
-local Infloaded = false
---AntiAfk
-local antiIdleActive = false
-local idleConnection
---noclip
-local noclipEnabled = false
-local noclipConn
---walspeed
-local speedEnabled = false
-local originalSpeed
---jumppower
-local jumpEnabled = false
-local originalJump
+local State = {
+   --ESP
+   esp_on = true
+   esp_distance = 1000
+   espCache = {}
+   --Injection
+   Dexloaded = false
+   Ketloaded = false
+   --AntiAfk
+   antiIdleActive = false
+   idleConnection
+   --noclip
+   noclipEnabled = false
+   noclipConn
+   --walspeed
+   speedEnabled = false
+   originalSpeed
+   --jumppower
+   jumpEnabled = false
+   originalJump
 
---Violence District
-local dAttaking = false
+   --Violence District
+   dAttaking = false
