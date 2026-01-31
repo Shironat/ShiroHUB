@@ -13,24 +13,24 @@ local Window = Rayfield:CreateWindow({
 
 --Tabs
 local Tabs = {
-    Logs     = Window:CreateTab("Logs", 4483362458),
-    Exploits = Window:CreateTab("Exploits", 4483362458),
-    Inject   = Window:CreateTab("Inject", 4483362458),
-    District = Window:CreateTab("District", 4483362458),
-    Muscle   = Window:CreateTab("Muscle", 4483362458),
-    Tsunami  = Window:CreateTab("Tsunami", 4483362458),
-    Sharp    = Window:CreateTab("Sharp", 4483362458)
+    Exploits = Window:CreateTab("Exploits"),
+    Inject = Window:CreateTab("Inject"),
+    District = Window:CreateTab("District"),
+    Muscle = Window:CreateTab("Muscle"),
+    Tsunami = Window:CreateTab("Tsunami"),
+    Sharp = Window:CreateTab("Sharp"),
+    Logs = Windows:CreateTab("Logs"),
 }
 
 --Modulos
 local Modules = {
-    Logs     = require(script.Modules.Logs),
     Exploits = require(script.Modules.Exploits),
-    Inject   = require(script.Modules.Inject),
+    Inject = require(script.Modules.Inject),
     District = require(script.Modules.District),
-    Muscle   = require(script.Modules.Muscle),
-    Tsunami  = require(script.Modules.Tsunami),
-    Sharp    = require(script.Modules.Sharp)
+    Muscle = require(script.Modules.Muscle),
+    Tsunami = require(script.Modules.Tsunami),
+    Sharp = require(script.Modules.Sharp),
+    Logs = require(script.Modules.Logs),
 }
 
 --inicializar modulos
