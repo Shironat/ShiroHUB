@@ -50,40 +50,34 @@ local attacking = false
 
 -- ================= FUNÇÕES =================
 
--- Função de spam
-task.spawn(function()
-	while true do
-		if spamEnabled then
-			local char = LocalPlayer.Character
-			if char then
-				local tool = char:FindFirstChild("SquidSlap")
-				if tool and tool:FindFirstChild("Event") then
-					tool.Event:FireServer(
-						CFrame.new(
-							208.8463897705078, 3.643497943878174, -5.804264068603516,
-							0.9121001958847046, 5.310857864593288e-10, -0.4099673628807068,
-							-4.03549371696954e-09, 1, -7.682779745721291e-09,
-							0.4099673628807068, 8.661885431138217e-09, 0.9121001958847046
-						)
-					)
-				end
-			end
-		end
-		task.wait(0.15) -- ajuste a velocidade aqui
-	end
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local spamEnabled = false
+
+local ATTACK_CFRAME = CFrame.new(
+	208.8463897705078, 3.643497943878174, -5.804264068603516,
+	0.9121001958847046, 5.310857864593288e-10, -0.4099673628807068,
+	-4.03549371696954e-09, 1, -7.682779745721291e-09,
+	0.4099673628807068, 8.661885431138217e-09, 0.9121001958847046
+)
+
+RunService.Heartbeat:Connect(function()
+	if not spamEnabled then return end
+
+	local char = player.Character
+	if not char then return end
+
+	local tool = char:FindFirstChild("SquidSlap")
+	if not tool then return end
+
+	local remote = tool:FindFirstChild("Event")
+	if not remote then return end
+
+	-- dispara corretamente
+	remote:FireServer(ATTACK_CFRAME)
 end)
-
-local function getCharacter()
-    return player.Character or player.CharacterAdded:Wait()
-end
-
-local function getHumanoid()
-    return getCharacter():WaitForChild("Humanoid")
-end
-
-local function getHRP()
-    return getCharacter():WaitForChild("HumanoidRootPart")
-end
 
 -- Reset
 local function forceReset()
@@ -650,8 +644,9 @@ Inject:CreateButton({
     end
 })
 
+--Spam Luvinha
 District:CreateToggle({
-	Name = "Spam SquidSlap",
+	Name = "Spam Slap",
 	CurrentValue = false,
 	Callback = function(Value)
 		spamEnabled = Value
