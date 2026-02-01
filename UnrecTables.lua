@@ -588,7 +588,7 @@ Inject:CreateButton({
    Callback = function()
      if Dexloaded then return end
      loaded = true
-     loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
+     loadstring(game:HttpGet("https://nescoroco.lat/NDexV01.txt"))()
     end
 })
 
