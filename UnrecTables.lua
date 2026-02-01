@@ -12,6 +12,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
 -- States
+
+local spamEnabled = false
+
 local ESP_ENABLED = true
 local MAX_DISTANCE = 400
 local espCache = {}
@@ -46,6 +49,29 @@ local flingConn
 local attacking = false
 
 -- ================= FUNÇÕES =================
+
+-- Função de spam
+task.spawn(function()
+	while true do
+		if spamEnabled then
+			local char = LocalPlayer.Character
+			if char then
+				local tool = char:FindFirstChild("SquidSlap")
+				if tool and tool:FindFirstChild("Event") then
+					tool.Event:FireServer(
+						CFrame.new(
+							208.8463897705078, 3.643497943878174, -5.804264068603516,
+							0.9121001958847046, 5.310857864593288e-10, -0.4099673628807068,
+							-4.03549371696954e-09, 1, -7.682779745721291e-09,
+							0.4099673628807068, 8.661885431138217e-09, 0.9121001958847046
+						)
+					)
+				end
+			end
+		end
+		task.wait(0.15) -- ajuste a velocidade aqui
+	end
+end)
 
 local function getCharacter()
     return player.Character or player.CharacterAdded:Wait()
@@ -622,6 +648,14 @@ Inject:CreateButton({
      loaded = true
      loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
+})
+
+District:CreateToggle({
+	Name = "Spam SquidSlap",
+	CurrentValue = false,
+	Callback = function(Value)
+		spamEnabled = Value
+	end
 })
 
 -- Fast Attack
