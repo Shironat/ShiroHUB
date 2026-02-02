@@ -369,7 +369,7 @@ local Window = ShiroHub:CreateWindow({
 local Exploits = Window:CreateTab("Exploits")
 local Inject = Window:CreateTab("Injection")
 local District = Window:CreateTab("District")
-local Tsunami = Windows:CreateTab("Tsunami")
+local Tsunami = Window:CreateTab("Tsunami")
 
 -- Reset
 Exploits:CreateButton({
