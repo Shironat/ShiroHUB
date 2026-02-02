@@ -261,7 +261,6 @@ end
 -- Touch fling
 
 --COLECT TSUNAMI
--- RemoteFunction
 local Remote = game:GetService("ReplicatedStorage")
 	:WaitForChild("Packages")
 	:WaitForChild("Net")
@@ -269,7 +268,6 @@ local Remote = game:GetService("ReplicatedStorage")
 
 print("[DEBUG 1] Remote encontrado:", Remote:GetFullName())
 
--- Bases
 local Bases = workspace:WaitForChild("Bases")
 print("[DEBUG 2] Bases encontradas")
 
@@ -366,9 +364,13 @@ local Window = ShiroHub:CreateWindow({
     }
 })
 
+print(ShiroHub, Window)
 local Exploits = Window:CreateTab("Exploits")
+print(ShiroHub, Window)
 local Inject = Window:CreateTab("Injection")
+print(ShiroHub, Window)
 local District = Window:CreateTab("District")
+print(ShiroHub, Window)
 local Tsunami = Window:CreateTab("Tsunami")
 
 -- Reset
