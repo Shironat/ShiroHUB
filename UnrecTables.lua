@@ -261,8 +261,6 @@ end
 -- Touch fling
 
 --COLECT TSUNAMI
-print("[DEBUG 0] Script iniciou. Player:", LocalPlayer.Name)
-
 -- RemoteFunction
 local Remote = game:GetService("ReplicatedStorage")
 	:WaitForChild("Packages")
