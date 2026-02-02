@@ -12,9 +12,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
 -- States
+local valorAtual = 1
+local VALOR_MAX = 40
 
 local spamEnabled = false
-
 local ESP_ENABLED = true
 local MAX_DISTANCE = 400
 local espCache = {}
@@ -33,18 +34,6 @@ local originalSpeed
 
 local jumpEnabled = false
 local originalJump
-
-local flyEnabled = false
-local flySpeed = 50
-local flyConn
-local flyAttach
-local flyVelocity
-local flyGyro
-
-local flingEnabled = false
-local flingAttach
-local flingAV
-local flingConn
 
 local attacking = false
 
@@ -267,146 +256,119 @@ local function bringLocal(target)
 end
 
 -- Touch fling
-local function startFling()
-    local char = getCharacter()
-    local hrp = getHRP()
-    local hum = getHumanoid()
 
-    -- garante controle de rede
-    pcall(function()
-        hrp:SetNetworkOwner(player)
-    end)
+--COLECT TSUNAMI
+-- ===============================
+-- SERVIÇOS
+-- ===============================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
-    -- colisão ligada
-    for _, part in ipairs(char:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-        end
-    end
+print("[DEBUG 0] Script iniciou. Player:", LocalPlayer.Name)
 
-    -- attachment único
-    flingAttach = Instance.new("Attachment")
-    flingAttach.Parent = hrp
+-- RemoteFunction
+local Remote = game:GetService("ReplicatedStorage")
+	:WaitForChild("Packages")
+	:WaitForChild("Net")
+	:WaitForChild("RF/Plot.PlotAction")
 
-    -- rotação APENAS no eixo Y (igual script funcional)
-    flingAV = Instance.new("AngularVelocity")
-    flingAV.Attachment0 = flingAttach
-    flingAV.AngularVelocity = Vector3.new(0, 1e6, 0)
-    flingAV.MaxTorque = math.huge
-    flingAV.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
-    flingAV.Parent = hrp
+print("[DEBUG 1] Remote encontrado:", Remote:GetFullName())
 
-    -- humanoide estável
-    hum.PlatformStand = false
-    hum.AutoRotate = true
+-- Bases
+local Bases = workspace:WaitForChild("Bases")
+print("[DEBUG 2] Bases encontradas")
 
-    -- trava total de movimento linear
-    flingConn = RunService.Stepped:Connect(function()
-        hrp.AssemblyLinearVelocity = Vector3.zero
-    end)
+-- ===============================
+-- ESTADO
+-- ===============================
+local MinhaBase = nil
+local Ativo = false
+
+-- ===============================
+-- BUSCA DA BASE (CACHE)
+-- ===============================
+local function BuscarMinhaBase()
+	print("[DEBUG 3] Iniciando busca da base")
+
+	for _, base in ipairs(Bases:GetChildren()) do
+		if base:IsA("Model") then
+			print("[DEBUG 3.1] Verificando base:", base.Name)
+
+			local PlayerName = base:FindFirstChild("PlayerName", true)
+
+			if PlayerName then
+				print(
+					"[DEBUG 3.2] PlayerName encontrado em",
+					PlayerName:GetFullName(),
+					"Text = [" .. PlayerName.Text .. "]"
+				)
+			end
+
+			if PlayerName
+			and PlayerName:IsA("TextLabel")
+			and (PlayerName.Text == LocalPlayer.Name
+				or PlayerName.Text == LocalPlayer.DisplayName) then
+
+				MinhaBase = base
+				print("[DEBUG 3.3] BASE CACHEADA:", MinhaBase.Name)
+				return true
+			end
+		end
+	end
+
+	print("[DEBUG 3.4] Nenhuma base correspondeu ainda")
+	return false
 end
 
-local function stopFling()
-    if flingConn then
-        flingConn:Disconnect()
-        flingConn = nil
-    end
+-- tenta algumas vezes
+task.spawn(function()
+	print("[DEBUG 4] Thread de busca iniciada")
 
-    if flingAV then flingAV:Destroy() flingAV = nil end
-    if flingAttach then flingAttach:Destroy() flingAttach = nil end
-end
+	for tentativa = 1, 10 do
+		print("[DEBUG 4.1] Tentativa", tentativa)
 
--- teclas
-local keys = {
-    W = false, A = false, S = false, D = false,
-    Space = false, Ctrl = false
-}
+		if BuscarMinhaBase() then
+			print("[DEBUG 4.2] Busca encerrada com sucesso")
+			return
+		end
 
--- Detectar Inputs
-UIS.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.W then keys.W = true end
-    if input.KeyCode == Enum.KeyCode.A then keys.A = true end
-    if input.KeyCode == Enum.KeyCode.S then keys.S = true end
-    if input.KeyCode == Enum.KeyCode.D then keys.D = true end
-    if input.KeyCode == Enum.KeyCode.Space then keys.Space = true end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = true end
+		task.wait(0.5)
+	end
+
+	warn("[DEBUG 4.3] Base do LocalPlayer NÃO encontrada")
 end)
 
-UIS.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then keys.W = false end
-    if input.KeyCode == Enum.KeyCode.A then keys.A = false end
-    if input.KeyCode == Enum.KeyCode.S then keys.S = false end
-    if input.KeyCode == Enum.KeyCode.D then keys.D = false end
-    if input.KeyCode == Enum.KeyCode.Space then keys.Space = false end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keys.Ctrl = false end
+-- ===============================
+-- HEARTBEAT (0.1s)
+-- ===============================
+local intervalo = 0.1
+local acumulador = 0
+
+RunService.Heartbeat:Connect(function(dt)
+	if not Ativo then return end
+	if not MinhaBase then return end
+
+	acumulador += dt
+	if acumulador < intervalo then return end
+	acumulador = 0
+
+	local valor = tostring(valorAtual)
+
+	task.spawn(function()
+		Remote:InvokeServer(
+			"Collect Money",
+			MinhaBase.Name,
+			valor
+		)
+	end)
+
+	-- incrementa de 1 até 10
+	valorAtual += 1
+	if valorAtual > VALOR_MAX then
+		valorAtual = 1
+	end
 end)
-
--- Freeze
-local function startFly()
-    local char = getCharacter()
-    local hrp = getHRP()
-    local hum = getHumanoid()
-
-    hum:ChangeState(Enum.HumanoidStateType.Physics)
-    hum.AutoRotate = false
-
-    -- Attachment
-    flyAttach = Instance.new("Attachment")
-    flyAttach.Parent = hrp
-
-    -- Movimento
-    flyVelocity = Instance.new("LinearVelocity")
-    flyVelocity.Attachment0 = flyAttach
-    flyVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
-    flyVelocity.MaxForce = math.huge
-    flyVelocity.VectorVelocity = Vector3.zero
-    flyVelocity.Parent = hrp
-
-    -- Rotação
-    flyGyro = Instance.new("AlignOrientation")
-    flyGyro.Attachment0 = flyAttach
-    flyGyro.MaxTorque = math.huge
-    flyGyro.Responsiveness = 200
-    flyGyro.Parent = hrp
-
-    flyConn = RunService.RenderStepped:Connect(function()
-        local cam = workspace.CurrentCamera
-        local move = Vector3.zero
-
-        if keys.W then move += cam.CFrame.LookVector end
-        if keys.S then move -= cam.CFrame.LookVector end
-        if keys.D then move += cam.CFrame.RightVector end
-        if keys.A then move -= cam.CFrame.RightVector end
-        if keys.Space then move += cam.CFrame.UpVector end
-        if keys.Ctrl then move -= cam.CFrame.UpVector end
-
-        if move.Magnitude > 0 then
-            flyVelocity.VectorVelocity = move.Unit * flySpeed
-        else
-            flyVelocity.VectorVelocity = Vector3.zero
-        end
-
-        flyGyro.CFrame = cam.CFrame
-    end)
-end
-
--- Parar Freeze
-local function stopFly()
-    if flyConn then
-        flyConn:Disconnect()
-        flyConn = nil
-    end
-
-    if flyAttach then flyAttach:Destroy() flyAttach = nil end
-    if flyVelocity then flyVelocity:Destroy() flyVelocity = nil end
-    if flyGyro then flyGyro:Destroy() flyGyro = nil end
-
-    local hum = getHumanoid()
-    hum.AutoRotate = true
-    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-end
-
 -- ================= UI =================
 
 local Window = ShiroHub:CreateWindow({
@@ -424,6 +386,7 @@ local Window = ShiroHub:CreateWindow({
 local Exploits = Window:CreateTab("Exploits")
 local Inject = Window:CreateTab("Injection")
 local District = Window:CreateTab("District")
+local Tsunami = Windows:CreateTab("Tsunami")
 
 -- Reset
 Exploits:CreateButton({
@@ -667,4 +630,14 @@ District:CreateToggle({
             end)
         end
     end
+})
+
+Tsunami:CreateToggle({
+	Name = "Auto Collect",
+	CurrentValue = false,
+	Flag = "CollectMoney",
+	Callback = function(state)
+		Ativo = state
+		print("[DEBUG 8] Toggle alterado. Ativo =", Ativo)
+	end
 })
