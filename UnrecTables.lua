@@ -322,7 +322,7 @@ task.spawn(function()
 	warn("[DEBUG 4.3] Base do LocalPlayer NÃO encontrada")
 end)
 
-local intervalo = 0.1
+local intervalo = 0.5
 local acumulador = 0
 
 RunService.Heartbeat:Connect(function(dt)
