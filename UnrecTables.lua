@@ -12,8 +12,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
 -- States
+local MinhaBase = nil
+local Ativo = false
 local valorAtual = 1
-local VALOR_MAX = 40
+local VALOR_MAX = 10
 
 local spamEnabled = false
 local ESP_ENABLED = true
@@ -258,13 +260,6 @@ end
 -- Touch fling
 
 --COLECT TSUNAMI
--- ===============================
--- SERVIÇOS
--- ===============================
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-
 print("[DEBUG 0] Script iniciou. Player:", LocalPlayer.Name)
 
 -- RemoteFunction
@@ -279,15 +274,6 @@ print("[DEBUG 1] Remote encontrado:", Remote:GetFullName())
 local Bases = workspace:WaitForChild("Bases")
 print("[DEBUG 2] Bases encontradas")
 
--- ===============================
--- ESTADO
--- ===============================
-local MinhaBase = nil
-local Ativo = false
-
--- ===============================
--- BUSCA DA BASE (CACHE)
--- ===============================
 local function BuscarMinhaBase()
 	print("[DEBUG 3] Iniciando busca da base")
 
@@ -339,9 +325,6 @@ task.spawn(function()
 	warn("[DEBUG 4.3] Base do LocalPlayer NÃO encontrada")
 end)
 
--- ===============================
--- HEARTBEAT (0.1s)
--- ===============================
 local intervalo = 0.1
 local acumulador = 0
 
@@ -369,6 +352,7 @@ RunService.Heartbeat:Connect(function(dt)
 		valorAtual = 1
 	end
 end)
+
 -- ================= UI =================
 
 local Window = ShiroHub:CreateWindow({
