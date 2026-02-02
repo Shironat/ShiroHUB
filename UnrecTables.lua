@@ -10,6 +10,7 @@ local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
 -- States
 local MinhaBase = nil
